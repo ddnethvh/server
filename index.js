@@ -1,12 +1,12 @@
 const express = require('express');
 const path = require('path');
-const Database = require('./Database');
+const db = require('./Database');
 const app = express();
 
 app.use(express.json());
 
-// Initialize database
-app.locals.database = new Database();
+// Use the database instance directly
+app.locals.database = db;
 
 const apiRoutes = [
   { path: '/api/leaderboard', router: require('./api/leaderboard') }
