@@ -3,16 +3,15 @@ import './MainView.css';
 import CheatCard from '../components/CheatCard/CheatCard';
 import Particles from '../components/Particles/Particles';
 import Footer from '../components/Footer/Footer';
+import NavBar from '../components/NavBar/NavBar';
+import GameMode from '../components/GameMode/GameMode';
+import { Link } from 'react-router-dom';
 
 const MainView = () => {
   return (
     <div>
       <Particles />
-      <nav className="cyber-nav">
-        <div className="nav-brand">
-          DDNet<span className="highlight">HvH</span>
-        </div>
-      </nav>
+      <NavBar />
 
       <section id="home" className="section">
         <div className="section-content">
@@ -20,10 +19,10 @@ const MainView = () => {
           <div className="cyber-line"></div>
           <p className="hero-text">
             The first and only HvH server network featuring 
-            <span className="mode fng">FNG</span>, 
-            <span className="mode dm">DM</span>, 
-            <span className="mode kog">KoG</span>, and
-            <span className="mode block">Block</span> modes.
+            <GameMode mode="FNG" />, 
+            <GameMode mode="DM" />, 
+            <GameMode mode="KoG" />, and
+            <GameMode mode="Block" /> modes.
             Experience the ultimate hacker versus hacker competition in DDNet.
           </p>
           <button className="cyber-button">Get Started</button>
@@ -47,36 +46,6 @@ const MainView = () => {
               <span className="stat-number">0</span>
               <span className="stat-label">Custom Maps</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="cheats" className="section">
-        <div className="section-content">
-          <h2>Available Cheats</h2>
-          <div className="cyber-line"></div>
-          <div className="cheats-grid">
-            <CheatCard
-              name="DD.CFF"
-              versions={['Free']}
-              description="The best free cheat available. Known for its stability and frequent updates. Community favorite."
-              downloadUrl="https://discord.com/invite/4nUaaaaWt5"
-            />
-            
-            <CheatCard
-              name="KRX Client"
-              versions={['Free', 'Premium', 'Ultimate']}
-              description="The most sophisticated DDNet cheat featuring FentBot™, advanced prediction systems, and input sequence generators. Includes TAS capabilities, perfect for both casual and competitive play. Ultimate tier provides access to exclusive features."
-              downloadUrl="https://krxclient.xyz/"
-              isPremium
-            />
-            
-            <CheatCard
-              name="Sash Client"
-              versions={['Free']}
-              description="A reliable free alternative with essential features. Perfect for beginners in the HvH scene."
-              downloadUrl="https://sash.mybin.ir/"
-            />
           </div>
         </div>
       </section>
