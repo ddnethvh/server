@@ -188,17 +188,12 @@ class Database {
       } else {
         sql = `
           SELECT 
-            r.Name as name,
+            Name as name,
             COUNT(*) as finishes,
-            SUM(CASE WHEN mp.points IS NOT NULL THEN mp.points ELSE 0 END) as points,
-            ROW_NUMBER() OVER (ORDER BY SUM(CASE WHEN mp.points IS NOT NULL THEN mp.points ELSE 0 END) DESC) as rank
-          FROM record_race r
-          LEFT JOIN (
-            SELECT map as map_name, points
-            FROM json_each('${JSON.stringify(this.mapPoints)}')
-          ) mp ON r.Map = mp.map_name
-          GROUP BY r.Name
-          ORDER BY points DESC
+            ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rank
+          FROM record_race
+          GROUP BY Name
+          ORDER BY finishes DESC
         `;
       }
 
@@ -216,15 +211,48 @@ class Database {
             timestamp: new Date(row.timestamp).toISOString()
           }));
         } else {
-          // Add score field for consistency with other leaderboards
-          rows = rows.map(row => ({
-            ...row,
-            score: row.points
-          }));
+          // Calculate points for each player
+          rows = rows.map(row => {
+            const playerPoints = this.calculatePlayerPoints(row.name);
+            return {
+              ...row,
+              points: playerPoints,
+              score: playerPoints // for consistency with other leaderboards
+            };
+          });
+          
+          // Sort by points
+          rows.sort((a, b) => b.points - a.points);
+          
+          // Update ranks
+          rows.forEach((row, index) => {
+            row.rank = index + 1;
+          });
         }
 
         resolve(rows);
       });
+    });
+  }
+
+  calculatePlayerPoints(playerName) {
+    return new Promise((resolve, reject) => {
+      this.DDNetDatabase.all(
+        'SELECT Map FROM record_race WHERE Name = ?',
+        [playerName],
+        (err, maps) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          
+          const totalPoints = maps.reduce((sum, { Map }) => {
+            return sum + (this.mapPoints[Map] || 0);
+          }, 0);
+          
+          resolve(totalPoints);
+        }
+      );
     });
   }
 
