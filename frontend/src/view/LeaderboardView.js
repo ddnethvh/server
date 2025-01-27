@@ -1,21 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { BiTrophy } from 'react-icons/bi';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { BiTrophy, BiSearch } from 'react-icons/bi';
 import NavBar from '../components/NavBar/NavBar';
 import GameMode from '../components/GameMode/GameMode';
 import './LeaderboardView.css';
 
 const LeaderboardView = () => {
   const { mode } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [leaderboardData, setLeaderboardData] = useState([]);
+  const [maps, setMaps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const selectedMap = searchParams.get('map');
+
+  // Fetch available maps for KoG mode
+  useEffect(() => {
+    const fetchMaps = async () => {
+      if (mode !== 'kog') return;
+      
+      try {
+        const response = await fetch('/api/leaderboard/kog/maps');
+        if (!response.ok) throw new Error('Failed to fetch maps');
+        const data = await response.json();
+        setMaps(data);
+      } catch (err) {
+        console.error('Error fetching maps:', err);
+        setError('Failed to load maps');
+      }
+    };
+
+    fetchMaps();
+  }, [mode]);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/leaderboard/${mode}`);
+        const url = mode === 'kog' && selectedMap 
+          ? `/api/leaderboard/${mode}?map=${selectedMap}`
+          : `/api/leaderboard/${mode}`;
+        
+        const response = await fetch(url);
         
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard data');
@@ -33,7 +61,28 @@ const LeaderboardView = () => {
     };
 
     fetchLeaderboard();
-  }, [mode]);
+  }, [mode, selectedMap]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value.toLowerCase());
+  };
+
+  const handleMapChange = (event) => {
+    const map = event.target.value;
+    if (map) {
+      setSearchParams({ map });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  // Filter players based on search
+  const filterPlayers = (players) => {
+    if (!searchQuery) return players;
+    return players.filter(player => 
+      player.name.toLowerCase().includes(searchQuery)
+    );
+  };
 
   const renderEmptyState = () => (
     <div className="leaderboard-empty">
@@ -55,24 +104,35 @@ const LeaderboardView = () => {
   const renderTable = (players, startIndex = 0) => {
     if (players.length === 0) return null;
 
+    const filteredPlayers = filterPlayers(players);
+
     return (
       <table className="leaderboard-table">
         <thead>
           <tr>
             <th>Rank</th>
             <th>Name</th>
-            <th>{mode === 'kog' ? 'Points' : 'Rating'}</th>
+            {selectedMap ? (
+              <th>Time</th>
+            ) : (
+              <th>{mode === 'kog' ? 'Points' : 'Rating'}</th>
+            )}
           </tr>
         </thead>
         <tbody>
-          {players.map((player) => (
+          {filteredPlayers.map((player) => (
             <tr 
               key={player.rank}
-              className={player.rank <= 3 ? `rank-${player.rank}` : undefined}
+              className={`
+                ${player.rank <= 3 ? `rank-${player.rank}` : ''}
+                ${player.name.toLowerCase().includes(searchQuery) ? 'highlighted' : ''}
+              `.trim()}
             >
               <td>#{player.rank}</td>
               <td>{player.name}</td>
-              <td>{player.score}</td>
+              <td>
+                {selectedMap ? player.formattedTime : player.score}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -140,6 +200,35 @@ const LeaderboardView = () => {
         <h1>
           <GameMode mode={mode} /> Leaderboard
         </h1>
+        
+        <div className="leaderboard-controls">
+          <div className="search-container">
+            <BiSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search players..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="search-input"
+            />
+          </div>
+          
+          {mode === 'kog' && (
+            <div className="map-selector">
+              <select 
+                value={selectedMap || ''} 
+                onChange={handleMapChange}
+                className="map-select"
+              >
+                <option value="">All Maps (Total Points)</option>
+                {maps.map(map => (
+                  <option key={map} value={map}>{map}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
         <div className="cyber-line"></div>
         {renderContent()}
       </div>

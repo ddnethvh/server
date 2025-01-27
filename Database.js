@@ -1,6 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 
 class Database {
   constructor() {
@@ -15,15 +16,52 @@ class Database {
     
     // Determine OS-specific path
     if (process.platform === 'win32') {
-      ddnetPath = path.join(homeDir, 'AppData', 'Local', 'DDNet', 'ddnet-server.sqlite');
+      // Try multiple possible Windows paths
+      const possiblePaths = [
+        path.join(homeDir, 'AppData', 'Local', 'DDNet', 'ddnet-server.sqlite'),
+        path.join(homeDir, 'AppData', 'Roaming', 'DDNet', 'ddnet-server.sqlite')
+      ];
+
+      // Find the first path that exists
+      for (const possiblePath of possiblePaths) {
+        if (fs.existsSync(possiblePath)) {
+          ddnetPath = possiblePath;
+          break;
+        }
+      }
+
+      if (!ddnetPath) {
+        console.warn('DDNet database not found in common Windows locations');
+        return null;
+      }
     } else {
       ddnetPath = path.join(homeDir, '.local', 'share', 'ddnet', 'ddnet-server.sqlite');
     }
 
     try {
-      return new sqlite3.Database(ddnetPath, sqlite3.OPEN_READONLY);
+      // Check if file exists and is readable
+      fs.accessSync(ddnetPath, fs.constants.R_OK);
+      
+      // Open database in read-only mode with more robust error handling
+      const db = new sqlite3.Database(ddnetPath, sqlite3.OPEN_READONLY, (err) => {
+        if (err) {
+          console.error('Error opening DDNet database:', err);
+          return null;
+        }
+      });
+
+      // Test the connection
+      db.get("SELECT 1", (err) => {
+        if (err) {
+          console.error('Error testing DDNet database connection:', err);
+          db.close();
+          return null;
+        }
+      });
+
+      return db;
     } catch (error) {
-      console.warn('Could not connect to DDNet database:', error);
+      console.warn('Could not access DDNet database:', error);
       return null;
     }
   }
