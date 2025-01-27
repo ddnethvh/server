@@ -77,14 +77,6 @@ const LeaderboardView = () => {
     }
   };
 
-  // Filter players based on search
-  const filterPlayers = (players) => {
-    if (!searchQuery) return players;
-    return players.filter(player => 
-      player.name.toLowerCase().includes(searchQuery)
-    );
-  };
-
   const renderEmptyState = () => (
     <div className="leaderboard-empty">
       <div className="empty-icon">
@@ -105,8 +97,6 @@ const LeaderboardView = () => {
   const renderTable = (players, startIndex = 0) => {
     if (players.length === 0) return null;
 
-    const filteredPlayers = filterPlayers(players);
-
     return (
       <table className="leaderboard-table">
         <thead>
@@ -121,21 +111,27 @@ const LeaderboardView = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredPlayers.map((player) => (
-            <tr 
-              key={player.rank}
-              className={`
-                ${player.rank <= 3 ? `rank-${player.rank}` : ''}
-                ${player.name.toLowerCase().includes(searchQuery) ? 'highlighted' : ''}
-              `.trim()}
-            >
-              <td>#{player.rank}</td>
-              <td>{player.name}</td>
-              <td>
-                {selectedMap ? player.formattedTime : player.score}
-              </td>
-            </tr>
-          ))}
+          {players.map((player) => {
+            const isHighlighted = searchQuery && player.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const isDimmed = searchQuery && !isHighlighted;
+            
+            return (
+              <tr 
+                key={player.rank}
+                className={`
+                  ${player.rank <= 3 ? `rank-${player.rank}` : ''}
+                  ${isHighlighted ? 'highlighted' : ''}
+                  ${isDimmed ? 'dimmed' : ''}
+                `.trim()}
+              >
+                <td>#{player.rank}</td>
+                <td>{player.name}</td>
+                <td>
+                  {selectedMap ? player.formattedTime : player.score}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     );
