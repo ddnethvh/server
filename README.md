@@ -58,7 +58,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the Proprietary License - see the LICENSE file for details.
+This project is licensed under the Proprietary License - see the [LICENSE](LICENSE.md) file for details.
 
 ## 🙏 Acknowledgments
 

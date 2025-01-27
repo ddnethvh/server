@@ -65,6 +65,9 @@ class Database {
         )
       `);
     });
+
+    // Load map points from JSON
+    this.mapPoints = require('./map_points.json');
   }
 
   // Rating-based methods (for FNG, Block, and DM)
@@ -185,12 +188,17 @@ class Database {
       } else {
         sql = `
           SELECT 
-            Name as name,
-            COUNT(*) as score,
-            ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rank
-          FROM record_race
-          GROUP BY Name
-          ORDER BY score DESC
+            r.Name as name,
+            COUNT(*) as finishes,
+            SUM(CASE WHEN mp.points IS NOT NULL THEN mp.points ELSE 0 END) as points,
+            ROW_NUMBER() OVER (ORDER BY SUM(CASE WHEN mp.points IS NOT NULL THEN mp.points ELSE 0 END) DESC) as rank
+          FROM record_race r
+          LEFT JOIN (
+            SELECT map as map_name, points
+            FROM json_each('${JSON.stringify(this.mapPoints)}')
+          ) mp ON r.Map = mp.map_name
+          GROUP BY r.Name
+          ORDER BY points DESC
         `;
       }
 
@@ -206,6 +214,12 @@ class Database {
             ...row,
             formattedTime: this.formatTime(row.time),
             timestamp: new Date(row.timestamp).toISOString()
+          }));
+        } else {
+          // Add score field for consistency with other leaderboards
+          rows = rows.map(row => ({
+            ...row,
+            score: row.points
           }));
         }
 
@@ -282,6 +296,10 @@ class Database {
         resolve(this.lastID);
       });
     });
+  }
+
+  async getMapPoints(mapName) {
+    return this.mapPoints[mapName] || null;
   }
 
   // Close database connection

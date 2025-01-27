@@ -50,4 +50,21 @@ router.get('/kog/player/:name', async (req, res) => {
   }
 });
 
+// Get points for a specific map
+router.get('/kog/map/:mapName/points', async (req, res) => {
+  try {
+    const { mapName } = req.params;
+    const points = await db.getMapPoints(mapName);
+    
+    if (points === null) {
+      return res.status(404).json({ error: 'Map not found' });
+    }
+    
+    res.json({ points });
+  } catch (error) {
+    console.error('Error fetching map points:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
