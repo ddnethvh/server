@@ -1,5 +1,35 @@
+.cheats-container {
+  min-height: 100vh;
+  padding-top: 80px;
+  color: #00ff9d;
+}
+
+.cheats-content {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 1rem;
+  width: 95%;
+}
+
+.cheats-content h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #00ff9d;
+}
+
+.cheats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 350px);
+  gap: 2rem;
+  margin-top: 3rem;
+  justify-content: center;
+}
+
 .cheat-card {
-  position: relative;
+  width: 100%;
   background: rgba(0, 255, 157, 0.05);
   border: 1px solid #00ff9d;
   padding: 2rem;
@@ -13,33 +43,6 @@
 .cheat-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
-}
-
-.cheat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.docs-link {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  color: rgba(0, 255, 157, 0.7);
-  font-size: 1.4rem;
-  transition: all 0.3s ease;
-  padding: 0.3rem;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.docs-link:hover {
-  color: #00ff9d;
-  background: rgba(0, 255, 157, 0.1);
-  transform: translateY(-2px);
 }
 
 .cheat-name {
@@ -116,38 +119,75 @@
   box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
 }
 
-.cheat-developers {
-  margin-top: auto;
-  padding-top: 0.5rem;
-  margin-bottom: 1rem;
+.cheats-controls {
+  width: 100%;
+  max-width: 1450px;
+  margin: 3rem auto 2rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
+  gap: 1rem;
+  padding: 0 1rem;
 }
 
-.developers-label {
-  color: rgba(0, 255, 157, 0.7);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.developers-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.3rem;
-}
-
-.developer {
-  color: #ff00ff;
-  padding: 0 0.3rem;
+.search-container {
+  flex: 0.9;
   position: relative;
 }
 
-.developer:not(:last-child)::after {
-  content: '•';
-  color: rgba(0, 255, 157, 0.4);
-  margin-left: 0.3rem;
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: rgba(0, 255, 157, 0.5);
+}
+
+.filter-controls {
+  flex: 0.1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.8rem;
+  background: rgba(0, 255, 157, 0.05);
+  border: 1px solid #00ff9d;
+  border-radius: 4px;
+  color: #00ff9d;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+  background: rgba(0, 255, 157, 0.1);
+}
+
+.search-input::placeholder {
+  color: rgba(0, 255, 157, 0.5);
+}
+
+.filter-btn {
+  width: 100%;
+  padding: 0.75rem 0;
+  background: transparent;
+  border: 1px solid #00ff9d;
+  color: #00ff9d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  background: rgba(0, 255, 157, 0.1);
+}
+
+.filter-btn.active {
+  background: #00ff9d;
+  color: #000;
 } 

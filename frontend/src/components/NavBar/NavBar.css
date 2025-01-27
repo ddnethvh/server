@@ -1,0 +1,61 @@
+.cyber-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 255, 157, 0.2);
+  z-index: 1000;
+}
+
+.nav-brand {
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #00ff9d;
+  text-decoration: none;
+  color: #00ff9d;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #00ff9d;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 255, 157, 0.1);
+}
+
+.dropdown-item:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 255, 157, 0.1);
+}
+
+.nav-link {
+  color: #00ff9d;
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #00ff9d;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.nav-link:hover {
+  background: rgba(0, 255, 157, 0.05);
+  transform: translateY(-1px);
+}

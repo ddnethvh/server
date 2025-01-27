@@ -1,0 +1,23 @@
+.game-mode {
+  display: inline-block;
+  padding: 0 0.2rem;
+  margin: 0;
+  font-weight: bold;
+  text-shadow: 0 0 10px currentColor;
+}
+
+.game-mode.fng {
+  color: #ff00ff;
+}
+
+.game-mode.dm {
+  color: #00ff55;
+}
+
+.game-mode.kog {
+  color: #00ffff;
+}
+
+.game-mode.block {
+  color: #ffa500;
+}
