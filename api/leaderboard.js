@@ -1,74 +1,51 @@
 const express = require('express');
 const router = express.Router();
-const apiKeyAuth = require('../middleware/auth');
+const db = require('../Database');
+// const apiKeyAuth = require('../middleware/auth');
 
-// Public routes
+// Get leaderboard data
 router.get('/:mode', async (req, res) => {
   try {
     const { mode } = req.params;
-    const limit = parseInt(req.query.limit) || 100;
-
-    if (!['fng', 'block', 'kog', 'dm'].includes(mode)) {
+    const { map } = req.query;
+    
+    if (!['fng', 'block', 'dm', 'kog'].includes(mode)) {
       return res.status(400).json({ error: 'Invalid mode' });
     }
 
-    const leaderboard = await req.app.locals.database.getLeaderboard(mode, limit);
-    
-    // Add rank to each entry
-    const rankedLeaderboard = leaderboard.map((entry, index) => ({
-      rank: index + 1,
-      ...entry
-    }));
+    let leaderboardData;
+    if (mode === 'kog') {
+      leaderboardData = await db.getKogLeaderboard(map);
+    } else {
+      leaderboardData = await db.getLeaderboard(mode);
+    }
 
-    res.json(rankedLeaderboard);
+    res.json(leaderboardData);
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Get player stats
-router.get('/:mode/player/:name', async (req, res) => {
+// Get available KoG maps
+router.get('/kog/maps', async (req, res) => {
   try {
-    const { mode, name } = req.params;
-    const stats = await req.app.locals.database.getPlayerStats(mode, name);
-    
-    if (!stats) {
-      return res.status(404).json({ error: 'Player not found' });
-    }
-    
-    res.json(stats);
+    const maps = await db.getKogMaps();
+    res.json(maps);
   } catch (error) {
-    console.error('Error fetching player stats:', error);
+    console.error('Error fetching KoG maps:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Protected routes - require API key
-router.post('/:mode/rating', apiKeyAuth, async (req, res) => {
+// Get player's KoG maps
+router.get('/kog/player/:name', async (req, res) => {
   try {
-    const { mode } = req.params;
-    const { playerName, ratingChange } = req.body;
-
-    if (!['fng', 'block', 'dm'].includes(mode)) {
-      return res.status(400).json({ error: 'Invalid mode for rating update' });
-    }
-
-    await req.app.locals.database.updateRating(mode, playerName, ratingChange);
-    res.json({ success: true });
+    const { name } = req.params;
+    const maps = await db.getPlayerKogMaps(name);
+    res.json(maps);
   } catch (error) {
-    console.error('Error updating rating:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-router.post('/kog/points', apiKeyAuth, async (req, res) => {
-  try {
-    const { playerName, points } = req.body;
-    await req.app.locals.database.addPoints(playerName, points);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error updating points:', error);
+    console.error('Error fetching player KoG maps:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
