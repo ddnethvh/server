@@ -163,7 +163,7 @@ class Database {
   }
 
   getKogLeaderboard(mapName = null) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!this.DDNetDatabase) {
         reject(new Error('DDNet database not available'));
         return;
@@ -197,41 +197,48 @@ class Database {
         `;
       }
 
-      this.DDNetDatabase.all(sql, params, (err, rows) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+      try {
+        const rows = await new Promise((resolve, reject) => {
+          this.DDNetDatabase.all(sql, params, (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+          });
+        });
 
         // Format times if it's a map-specific leaderboard
         if (mapName) {
-          rows = rows.map(row => ({
+          const formattedRows = rows.map(row => ({
             ...row,
             formattedTime: this.formatTime(row.time),
             timestamp: new Date(row.timestamp).toISOString()
           }));
+          resolve(formattedRows);
         } else {
           // Calculate points for each player
-          rows = rows.map(row => {
-            const playerPoints = this.calculatePlayerPoints(row.name);
-            return {
-              ...row,
-              points: playerPoints,
-              score: playerPoints // for consistency with other leaderboards
-            };
-          });
+          const rowsWithPoints = await Promise.all(
+            rows.map(async (row) => {
+              const playerPoints = await this.calculatePlayerPoints(row.name);
+              return {
+                ...row,
+                points: playerPoints,
+                score: playerPoints // for consistency with other leaderboards
+              };
+            })
+          );
           
           // Sort by points
-          rows.sort((a, b) => b.points - a.points);
+          rowsWithPoints.sort((a, b) => b.points - a.points);
           
           // Update ranks
-          rows.forEach((row, index) => {
+          rowsWithPoints.forEach((row, index) => {
             row.rank = index + 1;
           });
-        }
 
-        resolve(rows);
-      });
+          resolve(rowsWithPoints);
+        }
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
