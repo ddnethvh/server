@@ -23,7 +23,7 @@ const CheatsView = () => {
       description: "The best free cheat available. Known for its stability and frequent updates. Community favorite.",
       downloadUrl: "https://discord.com/invite/4nUaaaaWt5/",
       docsUrl: "https://docs.google.com/document/d/15aQTHKPOn_tYxsfsZ6ogOvB1ThFVDY1nWThgxy4c968/edit?usp=sharing",
-      developers: ['scar17off', 'directleaks-tsk']
+      developers: ['scar17off']
     },
     {
       name: "KRX Client",
@@ -103,4 +103,4 @@ const CheatsView = () => {
   );
 };
 
-export default CheatsView;
+export default CheatsView; 
