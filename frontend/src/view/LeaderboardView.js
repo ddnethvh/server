@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { BiTrophy, BiSearch } from 'react-icons/bi';
+import { BiTrophy, BiSearch, BiChevronDown } from 'react-icons/bi';
 import NavBar from '../components/NavBar/NavBar';
 import GameMode from '../components/GameMode/GameMode';
 import './LeaderboardView.css';
@@ -13,6 +13,7 @@ const LeaderboardView = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isControlsOpen, setIsControlsOpen] = useState(false);
 
   const selectedMap = searchParams.get('map');
 
@@ -146,7 +147,7 @@ const LeaderboardView = () => {
     }
 
     return (
-      <>
+      <div className="leaderboard-sections">
         {firstColumn.length > 0 && (
           <div className="leaderboard-section">
             <h2>Ranks 1-{firstColumn.length}</h2>
@@ -167,7 +168,7 @@ const LeaderboardView = () => {
             {renderTable(thirdColumn)}
           </div>
         )}
-      </>
+      </div>
     );
   };
 
@@ -201,35 +202,45 @@ const LeaderboardView = () => {
           <GameMode mode={mode} /> Leaderboard
         </h1>
         
-        <div className="leaderboard-controls">
-          <div className="search-container">
-            <BiSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search players..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="search-input"
-            />
-          </div>
+        <div className="cyber-line"></div>
+
+        <div className="controls-wrapper">
+          <button 
+            className={`controls-toggle ${isControlsOpen ? 'open' : ''}`}
+            onClick={() => setIsControlsOpen(!isControlsOpen)}
+          >
+            <BiChevronDown />
+          </button>
           
-          {mode === 'kog' && (
-            <div className="map-selector">
-              <select 
-                value={selectedMap || ''} 
-                onChange={handleMapChange}
-                className="map-select"
-              >
-                <option value="">All Maps (Total Points)</option>
-                {maps.map(map => (
-                  <option key={map} value={map}>{map}</option>
-                ))}
-              </select>
+          <div className={`leaderboard-controls ${isControlsOpen ? 'open' : ''}`}>
+            <div className="search-container">
+              <BiSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search players..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="search-input"
+              />
             </div>
-          )}
+            
+            {mode === 'kog' && (
+              <div className="map-selector">
+                <select 
+                  value={selectedMap || ''} 
+                  onChange={handleMapChange}
+                  className="map-select"
+                >
+                  <option value="">All Maps (Total Points)</option>
+                  {maps.map(map => (
+                    <option key={map} value={map}>{map}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="cyber-line"></div>
         {renderContent()}
       </div>
     </div>

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import NavBar from '../components/NavBar/NavBar';
 import CheatCard from '../components/CheatCard/CheatCard';
-import { BiSearch } from 'react-icons/bi';
+import { BiSearch, BiChevronDown } from 'react-icons/bi';
 import './CheatsView.css';
 
 const CheatsView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDevelopers, setShowDevelopers] = useState(true);
+  const [isControlsOpen, setIsControlsOpen] = useState(false);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value.toLowerCase());
@@ -63,24 +64,33 @@ const CheatsView = () => {
         <h1>Available Cheats</h1>
         <div className="cyber-line"></div>
         
-        <div className="cheats-controls">
-          <div className="search-container">
-            <BiSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search cheats..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="search-input"
-            />
-          </div>
-          <div className="filter-controls">
-            <button 
-              className={`filter-btn ${showDevelopers ? 'active' : ''}`}
-              onClick={toggleDevelopers}
-            >
-              Developers
-            </button>
+        <div className="controls-wrapper">
+          <button 
+            className={`controls-toggle ${isControlsOpen ? 'open' : ''}`}
+            onClick={() => setIsControlsOpen(!isControlsOpen)}
+          >
+            <BiChevronDown />
+          </button>
+          
+          <div className={`cheats-controls ${isControlsOpen ? 'open' : ''}`}>
+            <div className="search-container">
+              <BiSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search cheats..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="search-input"
+              />
+            </div>
+            <div className="filter-controls">
+              <button 
+                className={`filter-btn ${showDevelopers ? 'active' : ''}`}
+                onClick={toggleDevelopers}
+              >
+                Developers
+              </button>
+            </div>
           </div>
         </div>
 
