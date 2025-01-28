@@ -275,6 +275,123 @@ code {
   width: 100%;
 }
 
+/* Import markdown styles from Editor.css */
+.section-content, .doc-section {
+  /* Common markdown styles */
+  strong {
+    color: #00ff9d;
+    font-weight: bold;
+  }
+
+  em {
+    color: #00ff9d;
+    font-style: italic;
+  }
+
+  code {
+    background: rgba(0, 255, 157, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Fira Code', monospace;
+    color: #00ff9d;
+  }
+
+  pre {
+    margin: 1em 0;
+    padding: 0;
+    background: none;
+    border: none;
+    overflow-x: auto;
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+  }
+
+  p {
+    margin: 1em 0;
+    line-height: 1.6;
+  }
+
+  ul, ol {
+    margin: 1em 0;
+    padding-left: 2em;
+  }
+
+  li {
+    margin: 0.5em 0;
+  }
+
+  a {
+    color: #ff00ff;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 0, 255, 0.3);
+    transition: all 0.2s ease;
+  }
+
+  a:hover {
+    border-bottom-color: #ff00ff;
+  }
+
+  blockquote {
+    border-left: 3px solid #00ff9d;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: rgba(0, 255, 157, 0.8);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid rgba(0, 255, 157, 0.2);
+    margin: 2em 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #ff00ff;
+    line-height: 1.2;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+  }
+
+  h5 {
+    font-size: 1.1rem;
+  }
+
+  h6 {
+    font-size: 1rem;
+    color: rgba(255, 0, 255, 0.8);
+  }
+}
+
+/* Ensure first elements don't have top margin */
+.section-content > *:first-child,
+.doc-section > *:first-child {
+  margin-top: 0;
+}
+
+/* Ensure last elements don't have bottom margin */
+.section-content > *:last-child,
+.doc-section > *:last-child {
+  margin-bottom: 0;
+}
+
+/* End of Editor.css */
+
 .sidebar-category {
   margin-bottom: 2rem;
 }
