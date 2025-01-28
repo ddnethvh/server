@@ -13,6 +13,8 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './Editor.css';
 
 const MarkdownRenderer = ({ content }) => (
@@ -43,6 +45,38 @@ const MarkdownRenderer = ({ content }) => (
               </React.Fragment>
             ))}
           </p>
+        );
+      },
+      code({ node, inline, className, children, ...props }) {
+        const match = /language-(\w+)/.exec(className || '');
+        const language = match ? match[1] : '';
+        
+        // Handle inline code
+        if (inline) {
+          return (
+            <code className={className} {...props}>
+              {children}
+            </code>
+          );
+        }
+
+        // Handle code blocks with syntax highlighting
+        return (
+          <SyntaxHighlighter
+            style={vscDarkPlus}
+            language={language}
+            PreTag="div"
+            customStyle={{
+              margin: '1em 0',
+              padding: '1rem',
+              backgroundColor: 'rgba(10, 10, 10, 0.9)',
+              border: '1px solid rgba(0, 255, 157, 0.2)',
+              borderRadius: '4px',
+            }}
+            {...props}
+          >
+            {String(children).replace(/\n$/, '')}
+          </SyntaxHighlighter>
         );
       }
     }}

@@ -5,16 +5,102 @@
       "name": "Getting Started",
       "pages": [
         {
-          "id": "setup",
-          "name": "Setup",
+          "id": "setting-up",
+          "name": "Setting up the project",
           "sections": [
             {
-              "title": "Installation",
-              "content": "The DDNet client can be built from source or downloaded as a precompiled binary. The precompiled binary is available for Windows, Linux, and macOS."
+              "title": "Overview",
+              "content": "The DDNet client can be built from source or downloaded as a precompiled binary. The precompiled binary is available for Windows, Linux, and macOS.\nFor building on Windows, you need to have Visual Studio 2022 installed. For building on Linux, you need to have GCC installed. For building on macOS, you need to have Xcode installed."
+            },
+            {
+              "title": "Prerequisites",
+              "content": "To build from source, you need to have [GIT](https://git-scm.com/downloads), [CMake](https://cmake.org/download/), [Rust](https://www.rust-lang.org/tools/install), [Python](https://www.python.org/downloads/) and a C++ compiler installed. The DDNet client is built using the CMake build system. You can find the source code on the [DDNet GitHub repository](https://github.com/ddnet/ddnet)."
+            },
+            {
+              "title": "Downloading libraries",
+              "content": "The DDNet client uses several libraries. You need to download them before building the client.\n\n#### On Windows\nClone the DDNet libraries repository into the ddnet directory:\n```powershell\ngit clone https://github.com/ddnet/ddnet-libs.git\n```\n\n#### On Linux\nInstall the following packages:\n```bash\nsudo apt install build-essential cargo cmake git glslang-tools google-mock libavcodec-extra libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libcurl4-openssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpng-dev libsdl2-dev libsqlite3-dev libssl-dev libvulkan-dev libwavpack-dev libx264-dev python3 rustc spirv-tools\n```"
+            },
+            {
+              "title": "Building",
+              "content": "### Building the CMake project\nTo build the cmake project, you need to run the following command:\n```sh\ncd ddnet\nmkdir build\ncd build\ncmake ..\n```\n### Building the client\n\n#### On Windows\nEvery time you make changes to the source code, you need to build the DDNet.sln file.\n#### On Linux\nEvery time you make changes to the source code, you need to run the following command:\n```sh\ncd ddnet\ncd build\nmake -j$(nproc)\n```"
+            }
+          ]
+        },
+        {
+          "id": "game-components",
+          "name": "Game Components",
+          "sections": [
+            {
+              "title": "Overview",
+              "content": "Game components are the core of the DDNet client. They are the classes that handle the client-side game logic, like the players, the game controls, and more."
+            },
+            {
+              "title": "Adding a new file to the CMake project",
+              "content": "To add a new file to the CMake project, you need to create the file in the src/game/client/components directory, and then add it to the src/game/client directory in the CMakeLists.txt file. Just search for \"set_src(GAME_CLIENT GLOB_RECURSE src/game/client\" and add the new file to the list. Alphabetically, of course."
+            },
+            {
+              "title": "Creating a game component", 
+              "content": "To create a game component, you need to create a header file (.h) and implementation file (.cpp) that define a class inheriting from CComponent.\n\n#### Example: src/game/client/components/yourcomponent.h\n```cpp\n#ifndef GAME_CLIENT_COMPONENTS_YOURCOMPONENT_H\n#define GAME_CLIENT_COMPONENTS_YOURCOMPONENT_H\n\n#include <game/client/component.h>\n\nclass CYourComponent : public CComponent\n{\npublic:\n    virtual int Sizeof() const override { return sizeof(*this); }\n    void OnInit() override;\n    \n    // Add your component's methods and members here\n\nprivate:\n    // Private members\n};\n\n#endif\n```\n\n#### Example: src/game/client/components/yourcomponent.cpp\n```cpp\n#include \"yourcomponent.h\"\n\nvoid CYourComponent::OnInit()\n{\n    // Initialize your component\n}\n```\n\nAfter creating the component:\n\n1. Add it as a member to CGameClient in gameclient.h:\n```cpp\nclass CGameClient : public IGameClient\n{\n    CYourComponent m_YourComponent;\n    // ...\n};\n```\n\n2. Add it to the m_vpAll vector in CGameClient::OnConsoleInit() to register it:\n```cpp\nm_vpAll.insert(m_vpAll.end(), {\n    // ...\n    &m_YourComponent,\n    // ...\n});\n```\n\nIf your component needs input handling, also add it to m_vpInput vector."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "advanced-features",
+      "name": "Advanced Features",
+      "pages": [
+        {
+          "id": "avoid-freeze",
+          "name": "Avoid Freeze",
+          "sections": [
+            {
+              "title": "Overview",
+              "content": "The feature has many implementations, but the most common one is to predict the player's position, check if the player will freeze, and then apply the input to avoid the freeze. But some implementations are more advanced, like using the CGameWorld class to simulate the game state, calculate the best input to avoid the freeze (Fentbot / Mapbot algorithm), and then apply the input to avoid the freeze."
+            },
+            {
+              "title": "Implementation",
+              "content": "The feature can be found in leaked source code of Tater+ v3 client by Kiocode. It is implemented by checking the player's current position and velocity to predict if they will collide with a freeze tile in the future. If a collision is predicted, the player will automatically jump to avoid freezing:\n\n#### AntiFallingFreeze\n```cpp\nvoid CPlusFeatures::AntiFallingFreeze()\n{\n\tvec2 pos = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Predicted.m_Pos;\n\tvec2 vel = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Predicted.m_Vel;\n\n\tint x = static_cast<int>(pos.x);\n\tint y = static_cast<int>(pos.y);\n\n\tvec2 futurePos(x, y + (32.0f * vel.y) / 15.0f);\n\tint indexFuture = m_pClient->Collision()->GetPureMapIndex(futurePos);\n\tint indexCurrent = m_pClient->Collision()->GetPureMapIndex(pos);\n\n\tint tileFuture = m_pClient->Collision()->GetTileIndex(indexFuture);\n\tint tileCurrent = m_pClient->Collision()->GetTileIndex(indexCurrent);\n\n\tif(tileFuture == TILE_FREEZE &&\n\t\t(tileFuture != TILE_FREEZE || tileCurrent != TILE_FREEZE))\n\t{\n\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Jump = 1;\n\t\tNeedReset = true;\n\t}\n}\n```\n\n#### AntiGoingFreeze\n```cpp\nvoid CPlusFeatures::AntiGoingFreeze(int type)\n{\n\tif(!m_pClient->m_Snap.m_pLocalCharacter &&\n\t\t\t!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_Active ||\n\t\tm_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team == -1)\n\t{\n\t\treturn;\n\t}\n\n\tvec2 pos = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Predicted.m_Pos;\n\tint x = static_cast<int>(pos.x);\n\tint y = static_cast<int>(pos.y);\n\tint range = g_Config.m_ClPlusAntiGoingFreezeRange;\n\n\tif(type == 1)\n\t{\n\t\tvec2 rightPos(x + range, y);\n\t\tint indexRight = m_pClient->Collision()->GetPureMapIndex(rightPos);\n\t\tif(m_pClient->Collision()->GetTileIndex(indexRight) == TILE_FREEZE)\n\t\t{\n\t\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction = -1;\n\t\t}\n\t\telse\n\t\t{\n\t\t\tm_pClient->m_Controls.m_aLastData[g_Config.m_ClDummy].m_Direction = 0;\n\t\t}\n\n\t\tvec2 leftPos(x - range, y);\n\t\tint indexLeft = m_pClient->Collision()->GetPureMapIndex(leftPos);\n\t\tif(m_pClient->Collision()->GetTileIndex(indexLeft) == TILE_FREEZE)\n\t\t{\n\t\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction = 1;\n\t\t}\n\t\telse\n\t\t{\n\t\t\tm_pClient->m_Controls.m_aLastData[g_Config.m_ClDummy].m_Direction = 0;\n\t\t}\n\t}\n\telse if(type == 2)\n\t{\n\t\tvec2 rightPos(x + range, y);\n\t\tint indexRight = m_pClient->Collision()->GetPureMapIndex(rightPos);\n\t\tif(m_pClient->Collision()->GetTileIndex(indexRight) == TILE_FREEZE)\n\t\t{\n\t\t\tif(m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == 1)\n\t\t\t{\n\t\t\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction = 0;\n\t\t\t}\n\t\t}\n\t\telse\n\t\t{\n\t\t\tm_pClient->m_Controls.m_aLastData[g_Config.m_ClDummy].m_Direction =\n\t\t\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction;\n\t\t}\n\n\t\tvec2 leftPos(x - range, y);\n\t\tint indexLeft = m_pClient->Collision()->GetPureMapIndex(leftPos);\n\t\tif(m_pClient->Collision()->GetTileIndex(indexLeft) == TILE_FREEZE)\n\t\t{\n\t\t\tif(m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == -1)\n\t\t\t{\n\t\t\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction = 0;\n\t\t\t}\n\t\t}\n\t\telse\n\t\t{\n\t\t\tm_pClient->m_Controls.m_aLastData[g_Config.m_ClDummy].m_Direction =\n\t\t\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction;\n\t\t}\n\t}\n}\n```"
+            }
+          ]
+        },
+        {
+          "id": "tas",
+          "name": "TAS",
+          "sections": [
+            {
+              "title": "Overview",
+              "content": "TAS (Tool-Assisted Speedrun) is a cheat that allows you to play the game at a slower speed than real-time. This is useful for speedrunning the game. The TAS feature is only available in the KRX and DD.CFF client.\n#### How to use TAS\nTo use TAS, you need to enter the TAS mode. When you are in TAS mode, the camera center is locked to the fake player, making it look like you play as another player in a fake world.\nThe TAS provides a lot of functions to simulate the game state, like rewinding the game, fast forwarding the game, and more."
+            },
+            {
+              "title": "How it works",
+              "content": "The TAS feature is using CGameWorld class that provides basically everything you need to simulate the game state. It contains the game entities, the players, the game rules, and more."
+            },
+            {
+              "title": "Rendering the fake character",
+              "content": "The code should use the RenderPlayer method from players.cpp, but the position should be modified to utilize the position interpolation."
+            }
+          ]
+        },
+        {
+          "id": "fentbot-mapbot",
+          "name": "Fentbot / Mapbot",
+          "sections": [
+            {
+              "title": "Overview",
+              "content": "Fentbot and Mapbot are two automated bots that can be used to calculate the optimal path for a player to take. Fentbot is a bot that can be used to finish the map."
+            },
+            {
+              "title": "How it works",
+              "content": "Fentbot and Mapbot are using A* algorithm to calculate the geometric path for a player to take. Every frame, the bot will generate all possible inputs for the player to take, and then evaluate the benefit of each input. The benefit is the sum of the distance to the goal, filtered by the inputs that are safe to take. The bot will then take the input that maximizes the benefit, and so on until the goal is reached."
+            },
+            {
+              "title": "Development",
+              "content": "A very nice try to implement Fentbot in the client can be found in the leaked Tater+ v3 client by Kiocode. It contained useful methods to generate inputs and evaluate the benefit of each input:\n```cpp\nvoid CPlusFeatures::PredictionBot(int predictTicks, CGameWorld *curWorld)\n{\n\tCNetObj_PlayerInput input = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy];\n\n\tif(CheckPredictions(&input, 15, curWorld) == 9999)\n\t{\n\t\treturn;\n\t}\n\n\tstd::vector<int> dirs = {0, -1, 1};\n\tstd::vector<TestResult> results;\n\n\tfor(int dir : dirs)\n\t{\n\t\tfor(int hook = 0; hook <= 1; ++hook)\n\t\t{\n\t\t\tCNetObj_PlayerInput testInput = input;\n\t\t\ttestInput.m_Direction = dir;\n\t\t\ttestInput.m_Hook = hook;\n\n\t\t\tTestResult result;\n\t\t\tresult.lifetime = CheckPredictions(&testInput, predictTicks, curWorld);\n\t\t\tresult.input = testInput;\n\t\t\tresults.push_back(result);\n\t\t}\n\t}\n\n\tCNetObj_PlayerInput defaultInput{};\n\tCNetObj_PlayerInput newInput = GetAction(predictTicks, &results);\n\n\tif(m_ResultActions.back() >= predictTicks && (newInput.m_Direction != defaultInput.m_Direction || newInput.m_Hook != defaultInput.m_Hook || newInput.m_Fire != defaultInput.m_Fire || newInput.m_TargetX != defaultInput.m_TargetX))\n\t{\n\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction = newInput.m_Direction;\n\t\tm_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Hook = newInput.m_Hook;\n\t}\n}\n```"
             }
           ]
         }
       ]
     }
   ]
-} 
+}
