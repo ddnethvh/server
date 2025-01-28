@@ -1,0 +1,20 @@
+{
+  "categories": [
+    {
+      "id": "getting-started",
+      "name": "Getting Started",
+      "pages": [
+        {
+          "id": "setup",
+          "name": "Setup",
+          "sections": [
+            {
+              "title": "Installation",
+              "content": "The DDNet client can be built from source or downloaded as a precompiled binary. The precompiled binary is available for Windows, Linux, and macOS."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+} 

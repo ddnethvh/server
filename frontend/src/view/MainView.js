@@ -1,11 +1,9 @@
 import React from 'react';
 import './MainView.css';
-import CheatCard from '../components/CheatCard/CheatCard';
 import Particles from '../components/Particles/Particles';
 import Footer from '../components/Footer/Footer';
 import NavBar from '../components/NavBar/NavBar';
 import GameMode from '../components/GameMode/GameMode';
-import { Link } from 'react-router-dom';
 
 const MainView = () => {
   return (

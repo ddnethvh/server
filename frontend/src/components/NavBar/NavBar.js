@@ -24,6 +24,7 @@ const NavBar = () => {
           {rankItems}
         </DropdownButton>
         <Link to="/cheats" className="nav-link">Cheats</Link>
+        <Link to="/developer" className="nav-link">Developer</Link>
       </div>
     </nav>
   );

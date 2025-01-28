@@ -5,6 +5,7 @@ import './index.css';
 import MainView from './view/MainView';
 import LeaderboardView from './view/LeaderboardView';
 import CheatsView from './view/CheatsView';
+import DeveloperView from './view/developer/DeveloperView';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -14,6 +15,8 @@ root.render(
         <Route path="/" element={<MainView />} />
         <Route path="/leaderboard/:mode" element={<LeaderboardView />} />
         <Route path="/cheats" element={<CheatsView />} />
+        <Route path="/developer" element={<DeveloperView />} />
+        <Route path="/developer/:categoryId/:pageId" element={<DeveloperView />} />
       </Routes>
     </Router>
   </React.StrictMode>
