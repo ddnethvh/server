@@ -11,7 +11,7 @@ import {
   BiReset,
 } from 'react-icons/bi';
 import NavBar from '../../components/NavBar/NavBar';
-import './DeveloperView.css';
+import styles from './DeveloperView.module.css';
 import Editor from '../../components/Editor/Editor';
 import { MarkdownRenderer } from '../../components/Editor/Editor';
 
@@ -78,7 +78,7 @@ const DeveloperView = () => {
   const renderCodeBlock = (codeBlock) => {
     if (!codeBlock) return null;
     return (
-      <div className="code-block">
+      <div className={styles['code-block']}>
         <pre>
           <code>
             {`// ${codeBlock.title}\n${codeBlock.code}`}
@@ -101,7 +101,7 @@ const DeveloperView = () => {
 
   const renderSubsection = (subsection) => {
     return (
-      <div key={subsection.title} className="subsection">
+      <div key={subsection.title} className={styles.subsection}>
         <h3>{subsection.title}</h3>
         <p>{subsection.content}</p>
         {renderList(subsection.listItems)}
@@ -342,22 +342,22 @@ const DeveloperView = () => {
 
   const renderSection = (section, index) => {
     return (
-      <div key={section.title} className="doc-section">
+      <div key={section.title} className={styles['doc-section']}>
         {editMode && editingSection !== index && (
-          <div className="section-controls">
-            <div className="section-move-controls">
+          <div className={styles['section-controls']}>
+            <div className={styles['section-move-controls']}>
               <BiUpArrow 
                 title="Move Up"
                 onClick={() => moveSection({ type: 'up', index })}
-                className={index === 0 ? 'disabled' : ''}
+                className={index === 0 ? styles.disabled : ''}
               />
               <BiDownArrow 
                 title="Move Down"
                 onClick={() => moveSection({ type: 'down', index })}
-                className={activePage && index === activePage.sections.length - 1 ? 'disabled' : ''}
+                className={activePage && index === activePage.sections.length - 1 ? styles.disabled : ''}
               />
             </div>
-            <div className="section-actions">
+            <div className={styles['section-actions']}>
               <BiEdit 
                 title="Edit Section" 
                 onClick={() => setEditingSection(index)}
@@ -393,14 +393,14 @@ const DeveloperView = () => {
   const renderSideNav = () => {
     if (!docs) return null;
     return (
-      <div className="doc-sidebar">
-        <div className="sidebar-content">
+      <div className={styles['doc-sidebar']}>
+        <div className={styles['sidebar-content']}>
           {docs.categories.map(category => (
-            <div key={category.id} className="sidebar-category">
-              <div className="category-header">
+            <div key={category.id} className={styles['sidebar-category']}>
+              <div className={styles['category-header']}>
                 <h3>{category.name}</h3>
                 {editMode && (
-                  <div className="category-controls">
+                  <div className={styles['category-controls']}>
                     <BiEdit title="Edit Category" />
                     <BiTrash 
                       title="Delete Category" 
@@ -419,14 +419,14 @@ const DeveloperView = () => {
                     key={page.id}
                     className={
                       categoryId === category.id && pageId === page.id 
-                        ? 'active' 
+                        ? styles.active 
                         : ''
                     }
                   >
                     {editingName === `${category.id}-${page.id}` ? (
                       <input
                         type="text"
-                        className="page-name-input"
+                        className={styles['page-name-input']}
                         defaultValue={page.name}
                         autoFocus
                         onKeyDown={(e) => handlePageNameEdit(category.id, page.id, e.target.value, e)}
@@ -438,7 +438,7 @@ const DeveloperView = () => {
                       </span>
                     )}
                     {editMode && (
-                      <div className="page-controls">
+                      <div className={styles['page-controls']}>
                         <BiEdit 
                           title="Edit Page Name" 
                           onClick={() => setEditingName(`${category.id}-${page.id}`)}
@@ -455,14 +455,14 @@ const DeveloperView = () => {
             </div>
           ))}
           {editMode && (
-            <button className="add-category-btn" onClick={addCategory}>
+            <button className={styles['add-category-btn']} onClick={addCategory}>
               <BiPlus /> Add Category
             </button>
           )}
         </div>
-        <div className="sidebar-footer">
+        <div className={styles['sidebar-footer']}>
           <button 
-            className={`edit-mode-toggle ${editMode ? 'active' : ''}`}
+            className={`${styles['edit-mode-toggle']} ${editMode ? styles.active : ''}`}
             onClick={() => setEditMode(!editMode)}
             title="Toggle Edit Mode"
           >
@@ -471,7 +471,7 @@ const DeveloperView = () => {
           {editMode && (
             <>
               <button 
-                className="reset-button"
+                className={styles['reset-button']}
                 onClick={resetDocs}
                 title="Reset to Original"
               >
@@ -479,7 +479,7 @@ const DeveloperView = () => {
               </button>
               {hasChanges && (
                 <button 
-                  className="save-button"
+                  className={styles['save-button']}
                   onClick={handleSave}
                   title="Save Changes"
                 >
@@ -501,8 +501,8 @@ const DeveloperView = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="cyber-spinner"></div>
+      <div className={styles['loading-container']}>
+        <div className={styles['cyber-spinner']}></div>
         <p>Loading documentation...</p>
       </div>
     );
@@ -510,8 +510,8 @@ const DeveloperView = () => {
 
   if (error) {
     return (
-      <div className="error-container">
-        <p className="error-message">Error: {error}</p>
+      <div className={styles['error-container']}>
+        <p className={styles['error-message']}>Error: {error}</p>
       </div>
     );
   }
@@ -520,25 +520,25 @@ const DeveloperView = () => {
     <div>
       <NavBar />
       
-      <div className="doc-container">
+      <div className={styles['doc-container']}>
         {renderSideNav()}
         
-        <section className="doc-content">
-          <div className="section-content">
+        <section className={styles['doc-content']}>
+          <div className={styles['section-content']}>
             {activePage && (
               <>
                 {activePage.sections.map(renderSection)}
                 {editMode && (
-                  <button className="add-section-btn" onClick={addSection}>
+                  <button className={styles['add-section-btn']} onClick={addSection}>
                     <BiPlus /> Add Section
                   </button>
                 )}
               </>
             )}
             {!activePage && editMode && (
-              <div className="empty-page-message">
+              <div className={styles['empty-page-message']}>
                 <p>This page is empty. Add some sections to get started.</p>
-                <button className="add-section-btn" onClick={addSection}>
+                <button className={styles['add-section-btn']} onClick={addSection}>
                   <BiPlus /> Add Section
                 </button>
               </div>
