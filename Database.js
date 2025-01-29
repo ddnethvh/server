@@ -212,14 +212,23 @@ class Database {
 
       if (mapName) {
         sql = `
+          WITH RankedTimes AS (
+            SELECT 
+              Name,
+              Time,
+              Timestamp,
+              ROW_NUMBER() OVER (PARTITION BY Name ORDER BY Time ASC) as rn
+            FROM record_race
+            WHERE Map = ?
+          )
           SELECT 
             Name as name,
             Time as time,
             Timestamp as timestamp,
             ROW_NUMBER() OVER (ORDER BY Time ASC) as rank,
             1 as score
-          FROM record_race
-          WHERE Map = ?
+          FROM RankedTimes
+          WHERE rn = 1
           ORDER BY Time ASC
         `;
         params = [mapName];
