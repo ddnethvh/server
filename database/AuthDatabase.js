@@ -1,6 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 class AuthDatabase {
   constructor() {
@@ -26,29 +26,38 @@ class AuthDatabase {
 
   // Create new user
   async createUser(username, password, ign) {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Add input validation
+    if (!password || typeof password !== 'string') {
+      throw new Error('Valid password is required');
+    }
 
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        'INSERT INTO users (username, password, ign) VALUES (?, ?, ?)',
-        [username, hashedPassword, ign],
-        function(err) {
-          if (err) {
-            if (err.code === 'SQLITE_CONSTRAINT') {
-              if (err.message.includes('username')) {
-                reject(new Error('Username already exists'));
-              } else if (err.message.includes('ign')) {
-                reject(new Error('In-game name already exists'));
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      return new Promise((resolve, reject) => {
+        this.db.run(
+          'INSERT INTO users (username, password, ign) VALUES (?, ?, ?)',
+          [username, hashedPassword, ign],
+          function(err) {
+            if (err) {
+              if (err.code === 'SQLITE_CONSTRAINT') {
+                if (err.message.includes('username')) {
+                  reject(new Error('Username already exists'));
+                } else if (err.message.includes('ign')) {
+                  reject(new Error('In-game name already exists'));
+                }
+              } else {
+                reject(err);
               }
-            } else {
-              reject(err);
+              return;
             }
-            return;
+            resolve(this.lastID);
           }
-          resolve(this.lastID);
-        }
-      );
-    });
+        );
+      });
+    } catch (error) {
+      throw new Error('Error creating user: ' + error.message);
+    }
   }
 
   // Get user by username
