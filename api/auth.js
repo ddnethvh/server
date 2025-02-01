@@ -8,14 +8,31 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-here';
 // Register endpoint
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, ign } = req.body;
+    let { username, password, ign } = req.body;
 
-    // Validate input
+    // Get IP address from headers
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    // Clean the IP address (in case of x-forwarded-for chain)
+    const cleanIP = ip.split(',')[0].trim();
+
+    // Trim and validate input
     if (!username || !password || !ign) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Add length validation
+    username = username.trim();
+    ign = ign.trim();
+
+    if (username.length === 0) {
+      return res.status(400).json({ error: 'Username cannot be empty' });
+    }
+
+    if (ign.length === 0) {
+      return res.status(400).json({ error: 'IGN cannot be empty' });
+    }
+
+    // Length validation
     if (username.length > 16) {
       return res.status(400).json({ error: 'Username must not exceed 16 characters' });
     }
@@ -25,6 +42,12 @@ router.post('/register', async (req, res) => {
     }
 
     const db = req.app.locals.auth_db;
+
+    // Check if IP already has an account
+    const existingIP = await db.getUserByIP(cleanIP);
+    if (existingIP) {
+      return res.status(403).json({ error: 'An account already exists from this IP address' });
+    }
 
     // Check if username already exists
     const existingUsername = await db.getUserByUsername(username);
@@ -38,8 +61,8 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: 'IGN already taken' });
     }
 
-    // Create user
-    const userId = await db.createUser(username, password, ign);
+    // Create user with IP
+    const userId = await db.createUser(username, password, ign, cleanIP);
     
     const user = {
       id: userId,
@@ -64,6 +87,9 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Error in register:', error);
+    if (error.message.includes('An account already exists')) {
+      return res.status(403).json({ error: error.message });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 });

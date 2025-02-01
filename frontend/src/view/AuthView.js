@@ -22,17 +22,48 @@ const AuthView = () => {
     setError('');
     setLoading(true);
 
-    // Validation
-    if (!formData.username || !formData.password || (!isLogin && !formData.ign)) {
+    // Trim values
+    const trimmedUsername = formData.username.trim();
+    const trimmedIgn = formData.ign.trim();
+
+    // Basic validation
+    if (!trimmedUsername || !formData.password || (!isLogin && !trimmedIgn)) {
       setError('Please fill in all fields');
       setLoading(false);
       return;
     }
 
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    // Length validation
+    if (trimmedUsername.length === 0) {
+      setError('Username cannot be empty');
       setLoading(false);
       return;
+    }
+
+    if (trimmedUsername.length > 16) {
+      setError('Username must not exceed 16 characters');
+      setLoading(false);
+      return;
+    }
+
+    if (!isLogin) {
+      if (trimmedIgn.length === 0) {
+        setError('In-game name cannot be empty');
+        setLoading(false);
+        return;
+      }
+
+      if (trimmedIgn.length > 16) {
+        setError('In-game name must not exceed 16 characters');
+        setLoading(false);
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -43,9 +74,9 @@ const AuthView = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: formData.username,
+          username: trimmedUsername,
           password: formData.password,
-          ign: formData.ign
+          ign: trimmedIgn
         }),
       });
 
