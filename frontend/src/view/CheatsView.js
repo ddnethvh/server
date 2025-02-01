@@ -36,6 +36,13 @@ const CheatsView = () => {
       developers: ['krixx1337', 'fluffysnaff']
     },
     {
+      name: "Ae86",
+      versions: ['Lua', 'Client'],
+      description: "Lua version is a modified Sash client with russian translation and a few extra features. Client version is still in development.",
+      downloadUrl: "https://ae86client.glitch.me/",
+      developers: ['real_ueh']
+    },
+    {
       name: "Sash",
       versions: ['Free'],
       description: "A reliable free alternative with essential features. Perfect for block mode and casual play.",
