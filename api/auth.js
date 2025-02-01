@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Set a default JWT secret for development
@@ -30,16 +30,14 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: 'IGN already taken' });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     // Create user
-    const user = await db.createUser({
+    const userId = await db.createUser(username, password, ign);
+    
+    const user = {
+      id: userId,
       username,
-      password: hashedPassword,
       ign
-    });
+    };
 
     // Generate JWT token
     const token = jwt.sign(
