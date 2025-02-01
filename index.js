@@ -1,15 +1,20 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const db = require('./Database');
 const app = express();
+
+const leaderboard_db = require('./database/LeaderBoardDatabase');
+const auth_db = require('./database/AuthDatabase');
 
 app.use(express.json());
 
 // Use the database instance directly
-app.locals.database = db;
+app.locals.leaderboard_db = leaderboard_db;
+app.locals.auth_db = auth_db;
 
 const apiRoutes = [
-  { path: '/api/leaderboard', router: require('./api/leaderboard') }
+  { path: '/api/leaderboard', router: require('./api/leaderboard') },
+  { path: '/api/auth', router: require('./api/auth') }
 ];
 
 apiRoutes.forEach(({ path, router }) => {

@@ -4,8 +4,10 @@ import Particles from '../components/Particles/Particles';
 import Footer from '../components/Footer/Footer';
 import NavBar from '../components/NavBar/NavBar';
 import GameMode from '../components/GameMode/GameMode';
+import { useNavigate } from 'react-router-dom';
 
 const MainView = () => {
+  const navigate = useNavigate();
   return (
     <div>
       <Particles />
@@ -23,7 +25,7 @@ const MainView = () => {
             <GameMode mode="Block" /> modes.
             Experience the ultimate hacker versus hacker competition in DDNet.
           </p>
-          <button className="cyber-button">Get Started</button>
+          <button className="cyber-button" onClick={() => navigate('/cheats')}>Get Started</button>
         </div>
       </section>
 

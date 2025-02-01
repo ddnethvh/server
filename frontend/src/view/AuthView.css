@@ -1,0 +1,159 @@
+.auth-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 80px;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.auth-box {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid #00ff9d;
+  padding: 2rem;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.auth-box h2 {
+  text-align: center;
+  color: #00ff9d;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.auth-form {
+  margin-top: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.cyber-input {
+  width: 100%;
+  padding: 0.8rem;
+  background: rgba(0, 255, 157, 0.05);
+  border: 1px solid #00ff9d;
+  color: #00ff9d;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+/* Remove browser's autofill styling */
+.cyber-input:-webkit-autofill,
+.cyber-input:-webkit-autofill:hover,
+.cyber-input:-webkit-autofill:focus,
+.cyber-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgb(10, 10, 10) inset !important;
+  -webkit-text-fill-color: #00ff9d !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Firefox specific autofill override */
+.cyber-input:autofill {
+  background: rgb(10, 10, 10) !important;
+  color: #00ff9d !important;
+}
+
+.cyber-input:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+}
+
+.cyber-input::placeholder {
+  color: rgba(0, 255, 157, 0.5);
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.auth-switch {
+  margin-top: 2rem;
+  text-align: center;
+  color: #00ff9d;
+}
+
+.switch-button {
+  background: none;
+  border: none;
+  color: #ffa500;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  text-decoration: underline;
+  transition: all 0.3s ease;
+  -webkit-text-fill-color: #ffa500;
+  text-fill-color: #ffa500;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+}
+
+.switch-button:hover {
+  color: #ffb733;
+  text-shadow: 0 0 5px #ffa500;
+  -webkit-text-fill-color: #ffb733;
+  text-fill-color: #ffb733;
+}
+
+.switch-button:focus {
+  outline: none;
+  text-shadow: 0 0 5px #ffa500;
+}
+
+.auth-box .cyber-line {
+  margin-bottom: 2rem;
+}
+
+/* Animation for form transition */
+.auth-form {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Error message styling */
+.error-message {
+  color: #ff0055;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.cyber-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: rgba(0, 255, 157, 0.1);
+}
+
+.cyber-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.switch-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+} 

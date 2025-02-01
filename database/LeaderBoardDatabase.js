@@ -105,7 +105,7 @@ class Database {
     });
 
     // Load map points from JSON
-    this.mapPoints = require('./map_points.json');
+    this.mapPoints = require('../map_points.json');
   }
 
   // Rating-based methods (for FNG, Block, and DM)

@@ -10,10 +10,10 @@ import {
   BiDownArrow,
   BiReset,
 } from 'react-icons/bi';
-import NavBar from '../../components/NavBar/NavBar';
+import NavBar from '../components/NavBar/NavBar';
 import styles from './DeveloperView.module.css';
-import Editor from '../../components/Editor/Editor';
-import { MarkdownRenderer } from '../../components/Editor/Editor';
+import Editor from '../components/Editor/Editor';
+import { MarkdownRenderer } from '../components/Editor/Editor';
 
 const DeveloperView = () => {
   const [docs, setDocs] = useState(null);

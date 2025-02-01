@@ -1,0 +1,20 @@
+.not-found-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.not-found-section h1 {
+  font-size: 8rem;
+  color: #ff00ff;
+  text-shadow: 0 0 20px #ff00ff;
+  margin-bottom: 1rem;
+}
+
+.not-found-text {
+  font-size: 2rem;
+  color: #00ff9d;
+  margin: 2rem 0;
+} 

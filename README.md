@@ -35,7 +35,12 @@ cd frontend
 npm install
 ```
 
-3. Start the development servers
+3. Generate keys
+```bash
+node -e "const crypto = require('crypto'); const fs = require('fs'); if (!fs.existsSync('.env') || !fs.readFileSync('.env', 'utf8').includes('JWT_SECRET')) { const secret = crypto.randomBytes(64).toString('hex'); fs.appendFileSync('.env', `\nJWT_SECRET=${secret}`); console.log('JWT secret generated and added to .env'); }"
+```
+
+4. Start the development servers
 ```bash
 # Start backend server (from root directory)
 npm start

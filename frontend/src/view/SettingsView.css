@@ -1,0 +1,13 @@
+.settings-section {
+  min-height: 100vh;
+  padding-top: 80px;
+}
+
+.settings-container {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid #00ff9d;
+  padding: 2rem;
+  border-radius: 4px;
+  margin-top: 2rem;
+  box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+} 
