@@ -117,7 +117,11 @@ const HamburgerMenu = () => {
           {isAuthenticated() && (
             <div className="menu-section">
               <h3>Profile</h3>
-              <Link to="/profile" className="menu-item" onClick={toggleMenu}>
+              <Link 
+                to={`/profile/${user?.username}`} 
+                className="menu-item" 
+                onClick={toggleMenu}
+              >
                 My Profile
               </Link>
               <Link to="/settings" className="menu-item" onClick={toggleMenu}>

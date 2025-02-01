@@ -14,7 +14,8 @@ app.locals.auth_db = auth_db;
 
 const apiRoutes = [
   { path: '/api/leaderboard', router: require('./api/leaderboard') },
-  { path: '/api/auth', router: require('./api/auth') }
+  { path: '/api/auth', router: require('./api/auth') },
+  { path: '/api/profile', router: require('./api/profile') }
 ];
 
 apiRoutes.forEach(({ path, router }) => {

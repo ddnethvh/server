@@ -71,4 +71,33 @@ router.get('/kog/map/:mapName/points', async (req, res) => {
   }
 });
 
+// Get player stats for a specific mode
+router.get('/:mode/player/:ign', async (req, res) => {
+  try {
+    const { mode, ign } = req.params;
+    
+    if (!['fng', 'block', 'dm', 'kog'].includes(mode)) {
+      return res.status(400).json({ error: 'Invalid mode' });
+    }
+
+    const db = req.app.locals.leaderboard_db;
+    let playerStats;
+
+    if (mode === 'kog') {
+      playerStats = await db.getKogPlayerStats(ign);
+    } else {
+      playerStats = await db.getPlayerStats(mode, ign);
+    }
+
+    if (!playerStats) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    res.json(playerStats);
+  } catch (error) {
+    console.error('Error fetching player stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

@@ -154,6 +154,19 @@ class AuthDatabase {
     });
   }
 
+  async getUserByIGN(ign) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        'SELECT * FROM users WHERE ign = ?',
+        [ign],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        }
+      );
+    });
+  }
+
   // Close database connection
   close() {
     this.db.close();

@@ -68,37 +68,26 @@ class Database {
 
   init() {
     this.db.serialize(() => {
-      // FNG, Block, and DM tables use rating system
-      const ratingTableSQL = `
-        CREATE TABLE IF NOT EXISTS $table (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT UNIQUE NOT NULL,
-          rating INTEGER DEFAULT 1500
-        )
-      `;
-
-      // KoG table uses points system
-      const pointsTableSQL = `
-        CREATE TABLE IF NOT EXISTS kog (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT UNIQUE NOT NULL,
-          points INTEGER DEFAULT 0
-        )
-      `;
-
       // Create tables for each mode
-      this.db.run(ratingTableSQL.replace('$table', 'fng'));
-      this.db.run(ratingTableSQL.replace('$table', 'block'));
-      this.db.run(ratingTableSQL.replace('$table', 'dm'));
-      this.db.run(pointsTableSQL);
+      const modes = ['fng', 'block', 'dm'];
+      modes.forEach(mode => {
+        this.db.run(`
+          CREATE TABLE IF NOT EXISTS ${mode}_rankings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            player_name TEXT UNIQUE NOT NULL,
+            points INTEGER DEFAULT 0
+          )
+        `);
+      });
 
-      // Add KoG finishes table
+      // Create KoG rankings table
       this.db.run(`
-        CREATE TABLE IF NOT EXISTS kog_finishes (
+        CREATE TABLE IF NOT EXISTS kog_rankings (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           player_name TEXT NOT NULL,
           map_name TEXT NOT NULL,
-          timestamp INTEGER NOT NULL,
+          points INTEGER DEFAULT 0,
+          completion_time REAL,
           UNIQUE(player_name, map_name)
         )
       `);
@@ -178,20 +167,146 @@ class Database {
     });
   }
 
-  // Get player stats
+  // Consolidated method for getting player stats
   async getPlayerStats(mode, playerName) {
     if (!['fng', 'block', 'dm', 'kog'].includes(mode)) {
-      throw new Error('Invalid mode');
+      throw new Error('Invalid game mode');
     }
 
-    const sql = `SELECT * FROM ${mode} WHERE name = ?`;
+    try {
+      if (mode === 'kog') {
+        if (!this.DDNetDatabase) {
+          console.error('DDNet database not available');
+          return {
+            rank: 0,
+            points: 0,
+            mapsCompleted: 0,
+            totalFinishes: 0
+          };
+        }
 
-    return new Promise((resolve, reject) => {
-      this.db.get(sql, [playerName], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+        // Get player's stats (unique maps and total finishes)
+        const playerStats = await new Promise((resolve, reject) => {
+          this.DDNetDatabase.get(
+            `SELECT 
+              COUNT(DISTINCT Map) as uniqueMaps,
+              COUNT(*) as totalFinishes
+            FROM record_race 
+            WHERE Name = ?`,
+            [playerName],
+            (err, stats) => {
+              if (err) reject(err);
+              else resolve(stats);
+            }
+          );
+        });
+
+        // Get unique maps to calculate points
+        const completedMaps = await new Promise((resolve, reject) => {
+          this.DDNetDatabase.all(
+            'SELECT DISTINCT Map FROM record_race WHERE Name = ?',
+            [playerName],
+            (err, maps) => {
+              if (err) reject(err);
+              else resolve(maps);
+            }
+          );
+        });
+
+        // Calculate total points
+        const points = completedMaps.reduce((sum, { Map }) => {
+          return sum + (this.mapPoints[Map] || 0);
+        }, 0);
+
+        // Get all players' points to calculate rank
+        const allPlayers = await new Promise((resolve, reject) => {
+          this.DDNetDatabase.all(
+            `SELECT 
+              Name,
+              COUNT(DISTINCT Map) as uniqueMaps,
+              COUNT(*) as totalFinishes 
+            FROM record_race 
+            GROUP BY Name`,
+            [],
+            async (err, players) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+
+              // Calculate points for each player
+              const playersWithPoints = await Promise.all(
+                players.map(async (player) => {
+                  const maps = await new Promise((resolve, reject) => {
+                    this.DDNetDatabase.all(
+                      'SELECT DISTINCT Map FROM record_race WHERE Name = ?',
+                      [player.Name],
+                      (err, maps) => {
+                        if (err) reject(err);
+                        else resolve(maps);
+                      }
+                    );
+                  });
+
+                  const points = maps.reduce((sum, { Map }) => {
+                    return sum + (this.mapPoints[Map] || 0);
+                  }, 0);
+
+                  return {
+                    name: player.Name,
+                    points,
+                    uniqueMaps: player.uniqueMaps,
+                    totalFinishes: player.totalFinishes
+                  };
+                })
+              );
+
+              resolve(playersWithPoints);
+            }
+          );
+        });
+
+        // Calculate rank
+        allPlayers.sort((a, b) => b.points - a.points);
+        const rank = allPlayers.findIndex(p => p.name === playerName) + 1;
+
+        return {
+          rank: rank || 0,
+          points: points || 0,
+          mapsCompleted: playerStats.uniqueMaps || 0,
+          totalFinishes: playerStats.totalFinishes || 0
+        };
+      } else {
+        // For other modes (fng, block, dm)
+        const tableName = `${mode}_rankings`;
+        const query = `
+          SELECT 
+            player_name,
+            points,
+            (
+              SELECT COUNT(*) + 1 
+              FROM ${tableName} r2 
+              WHERE r2.points > r1.points
+            ) as rank
+          FROM ${tableName} r1
+          WHERE player_name = ?
+        `;
+
+        const result = await this.db.get(query, [playerName]);
+        if (!result) return {
+          rank: 0,
+          points: 0
+        };
+
+        return {
+          rank: result.rank || 0,
+          points: result.points || 0
+        };
+      }
+    } catch (error) {
+      console.error(`Error getting ${mode} stats for ${playerName}:`, error);
+      return null;
+    }
   }
 
   formatTime(seconds) {

@@ -22,7 +22,7 @@ root.render(
         <Route path="/cheats" element={<CheatsView />} />
         <Route path="/developer" element={<DeveloperView />} />
         <Route path="/developer/:categoryId/:pageId" element={<DeveloperView />} />
-        <Route path="/profile" element={<ProfileView />} />
+        <Route path="/profile/:username" element={<ProfileView />} />
         <Route path="/settings" element={<SettingsView />} />
         <Route path="*" element={<NotFoundView />} />
       </Routes>

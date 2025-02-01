@@ -11,40 +11,53 @@ router.post('/register', async (req, res) => {
   try {
     const { username, password, ign } = req.body;
 
+    // Validate input
     if (!username || !password || !ign) {
-      return res.status(400).json({ error: 'Username, password and in-game name are required' });
+      return res.status(400).json({ error: 'All fields are required' });
     }
 
     const db = req.app.locals.auth_db;
-    
-    try {
-      const userId = await db.createUser(username, password, ign);
-      
-      // Generate JWT token after successful registration
-      const token = jwt.sign(
-        { 
-          userId,
-          username
-        },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
 
-      res.status(201).json({ 
-        message: 'User registered successfully',
-        token
-      });
-    } catch (err) {
-      if (err.message === 'Username already exists') {
-        return res.status(409).json({ error: 'Username already exists' });
-      }
-      if (err.message === 'In-game name already exists') {
-        return res.status(409).json({ error: 'In-game name already exists' });
-      }
-      throw err;
+    // Check if username already exists
+    const existingUsername = await db.getUserByUsername(username);
+    if (existingUsername) {
+      return res.status(409).json({ error: 'Username already taken' });
     }
+
+    // Check if IGN already exists
+    const existingIGN = await db.getUserByIGN(ign);
+    if (existingIGN) {
+      return res.status(409).json({ error: 'IGN already taken' });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create user
+    const user = await db.createUser({
+      username,
+      password: hashedPassword,
+      ign
+    });
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        ign: user.ign
+      }
+    });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Error in register:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -148,6 +161,30 @@ router.get('/me', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching user info:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user by username
+router.get('/user/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const db = req.app.locals.auth_db;
+    
+    const user = await db.getUserByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Return non-sensitive user data
+    res.json({
+      id: user.id,
+      username: user.username,
+      ign: user.ign,
+      created_at: user.created_at
+    });
+  } catch (error) {
+    console.error('Error fetching user:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
