@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import styles from './ProfileView.module.css';
 import NavBar from '../components/NavBar/NavBar';
 import Particles from '../components/Particles/Particles';
@@ -37,6 +38,11 @@ const ProfileView = () => {
 
     fetchProfileData();
   }, [username]);
+
+  const sanitizeText = (text) => {
+    if (!text) return '';
+    return DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
+  };
 
   if (loading) {
     return (
@@ -93,9 +99,9 @@ const ProfileView = () => {
               <FiUser />
             </div>
             <div className={styles['profile-titles']}>
-              <h1>{userData.username}</h1>
+              <h1>{sanitizeText(userData.username)}</h1>
               <div className={styles['profile-subtitle']}>
-                <span><FiMonitor /> {userData.ign}</span>
+                <span><FiMonitor /> {sanitizeText(userData.ign)}</span>
                 <span><FiCalendar /> Joined {new Date(userData.created_at).toLocaleDateString()}</span>
               </div>
             </div>

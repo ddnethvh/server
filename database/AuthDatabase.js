@@ -30,6 +30,14 @@ class AuthDatabase {
     if (!password || typeof password !== 'string') {
       throw new Error('Valid password is required');
     }
+    
+    if (!username || typeof username !== 'string' || username.length > 16) {
+      throw new Error('Username must be a string of 1-16 characters');
+    }
+
+    if (!ign || typeof ign !== 'string' || ign.length > 16) {
+      throw new Error('IGN must be a string of 1-16 characters');
+    }
 
     try {
       const hashedPassword = await bcrypt.hash(password, 10);

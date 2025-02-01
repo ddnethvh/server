@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Set a default JWT secret for development
@@ -14,6 +13,15 @@ router.post('/register', async (req, res) => {
     // Validate input
     if (!username || !password || !ign) {
       return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Add length validation
+    if (username.length > 16) {
+      return res.status(400).json({ error: 'Username must not exceed 16 characters' });
+    }
+
+    if (ign.length > 16) {
+      return res.status(400).json({ error: 'IGN must not exceed 16 characters' });
     }
 
     const db = req.app.locals.auth_db;
