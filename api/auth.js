@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const proxyCheck = require('../middleware/proxy.js');
 
 // Set a default JWT secret for development
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-here';
 
 // Register endpoint
-router.post('/register', async (req, res) => {
+router.post('/register', proxyCheck, async (req, res) => {
   try {
-    let { username, password, ign } = req.body;
+    // Check if request is coming from a proxy
+    if (req.proxyData?.isProxy) {
+      return res.status(403).json({ error: 'Registration through proxy/VPN is not allowed' });
+    }
 
-    // Get IP address from headers
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    
-    // Clean the IP address (in case of x-forwarded-for chain)
-    const cleanIP = ip.split(',')[0].trim();
+    let { username, password, ign } = req.body;
 
     // Trim and validate input
     if (!username || !password || !ign) {
@@ -43,12 +43,6 @@ router.post('/register', async (req, res) => {
 
     const db = req.app.locals.auth_db;
 
-    // Check if IP already has an account
-    const existingIP = await db.getUserByIP(cleanIP);
-    if (existingIP) {
-      return res.status(403).json({ error: 'An account already exists from this IP address' });
-    }
-
     // Check if username already exists
     const existingUsername = await db.getUserByUsername(username);
     if (existingUsername) {
@@ -61,8 +55,8 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: 'IGN already taken' });
     }
 
-    // Create user with IP
-    const userId = await db.createUser(username, password, ign, cleanIP);
+    // Create user
+    const userId = await db.createUser(username, password, ign);
     
     const user = {
       id: userId,

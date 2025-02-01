@@ -10,14 +10,13 @@ class AuthDatabase {
 
   init() {
     this.db.serialize(() => {
-      // Create users table with IGN field and registration_ip
+      // Create users table
       this.db.run(`
         CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           username TEXT UNIQUE NOT NULL,
           password TEXT NOT NULL,
           ign TEXT UNIQUE,
-          registration_ip TEXT NOT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
@@ -26,7 +25,7 @@ class AuthDatabase {
   }
 
   // Create new user
-  async createUser(username, password, ign, ip) {
+  async createUser(username, password, ign) {
     // Add input validation
     if (!password || typeof password !== 'string') {
       throw new Error('Valid password is required');
@@ -56,23 +55,13 @@ class AuthDatabase {
       throw new Error('IGN must be 1-16 characters');
     }
 
-    if (!ip) {
-      throw new Error('IP address is required');
-    }
-
     try {
-      // Check if IP already exists
-      const existingIP = await this.getUserByIP(ip);
-      if (existingIP) {
-        throw new Error('An account already exists from this IP address');
-      }
-
       const hashedPassword = await bcrypt.hash(password, 10);
 
       return new Promise((resolve, reject) => {
         this.db.run(
-          'INSERT INTO users (username, password, ign, registration_ip) VALUES (?, ?, ?, ?)',
-          [username, hashedPassword, ign, ip],
+          'INSERT INTO users (username, password, ign) VALUES (?, ?, ?)',
+          [username, hashedPassword, ign],
           function(err) {
             if (err) {
               if (err.code === 'SQLITE_CONSTRAINT') {
@@ -207,24 +196,6 @@ class AuthDatabase {
         (err, row) => {
           if (err) reject(err);
           else resolve(row);
-        }
-      );
-    });
-  }
-
-  // Get user by IP
-  async getUserByIP(ip) {
-    return new Promise((resolve, reject) => {
-      this.db.get(
-
-        'SELECT id FROM users WHERE registration_ip = ?',
-        [ip],
-        (err, row) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(row);
         }
       );
     });
