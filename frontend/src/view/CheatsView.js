@@ -36,6 +36,14 @@ const CheatsView = () => {
       developers: ['krixx1337', 'fluffysnaff']
     },
     {
+      name: "Zyro",
+      versions: ['Free'],
+      description: "One of the most popular open source cheat clients based on DDNet 18.9.1. It's focused on simplicity and clean code architecture, and contains many features that are useful for competitive play.",
+      downloadUrl: "https://github.com/scar17off/zyro-ddnet/releases",
+      docsUrl: "https://github.com/scar17off/zyro-ddnet",
+      developers: ['scar17off']
+    },
+    {
       name: "Ae86",
       versions: ['Lua', 'Client'],
       description: "Lua version is a modified Sash client with russian translation and a few extra features. Client version is still in development.",
